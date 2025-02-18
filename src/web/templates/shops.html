@@ -1,0 +1,45 @@
+{% extends "index.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>监控店铺管理</h2>
+    
+    <form method="post" class="mb-4">
+        <div class="input-group">
+            <input type="url" name="shop_url" class="form-control" 
+                   placeholder="输入Etsy店铺URL" required>
+            <button class="btn btn-success" type="submit">添加店铺</button>
+        </div>
+    </form>
+
+    <div class="row">
+        {% for shop in shops %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        {{ shop.split('/')[-1] }}
+                        <a href="/delete?url={{ shop | urlencode }}" 
+                           class="btn btn-danger btn-sm float-end">删除</a>
+                    </h5>
+                    <canvas id="chart{{ loop.index }}"></canvas>
+                </div>
+            </div>
+        </div>
+        <script>
+            new Chart(document.getElementById('chart{{ loop.index }}').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: {{ sales_data[shop] | map(attribute='time') | list | tojson }},
+                    datasets: [{
+                        label: '销量',
+                        data: {{ sales_data[shop] | map(attribute='sales') | list | tojson }},
+                        borderColor: '#4bc0c0',
+                        fill: false
+                    }]
+                }
+            });
+        </script>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
